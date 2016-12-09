@@ -1,0 +1,23 @@
+name: yi-custom
+version: 0.13.4
+license: GPL-2
+maintainer: Pavel Grafov <graphov@gmail.com>
+
+ghc-options: -Wall -ferror-spans -threaded -v
+
+dependencies:
+    - base >= 4.8 && < 5
+    - microlens-platform
+    - mtl
+    - yi-core
+    - yi-frontend-vty
+    - yi-keymap-emacs
+    - yi-misc-modes
+    - yi-mode-haskell
+    - yi-rope
+    - yi-keymap-cua
+
+executables:
+    yi:
+        main: Main.hs
+        source-dirs: .

@@ -1,0 +1,20 @@
+resolver: lts-7.7
+packages:
+- location: .
+- location:
+    git: git@github.com:pcapriotti/optparse-applicative
+    commit: 23f15d262fede5a3a0fe9c25808719b811275df0
+  extra-dep: true
+- location: 
+    git: git@github.com:yi-editor/yi
+    commit: 7fd6b0cd023d4a2f4a72daf7b374150afea0279d
+  subdirs:
+  - yi-core
+  - yi-frontend-vty
+  - yi-keymap-cua
+  - yi-keymap-emacs
+  - yi-misc-modes
+  - yi-mode-haskell
+  extra-dep: true
+
+
