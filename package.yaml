@@ -3,7 +3,7 @@ version: 0.13.4
 license: GPL-2
 maintainer: Pavel Grafov <graphov@gmail.com>
 
-ghc-options: -Wall -ferror-spans -threaded -v
+ghc-options: -Wall -ferror-spans -threaded
 
 dependencies:
     - base >= 4.8 && < 5
