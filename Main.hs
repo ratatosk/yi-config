@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleContexts #-}
 import Control.Monad.State.Lazy
 import Data.List
 import Lens.Micro.Platform
@@ -11,7 +12,7 @@ import Yi.Editor
 import Yi.File
 import Yi.Keymap
 import Yi.Keymap.Keys
-import Yi.MiniBuffer (promptingForBuffer)
+import Yi.MiniBuffer (promptingForBuffer, spawnMinibufferE)
 import Yi.Config.Simple (globalBindKeys)
 import Yi.Config.Simple.Types
 import Yi.Config.Default (defaultConfig)
@@ -22,8 +23,14 @@ import Yi.Config.Default.Cua (configureCua)
 
 {-
   TODOS:
-  * Tab handling.
+  * Keep indent on Enter.
   * Splitting horizontally, vertically.
+  * Make config a record rather than monadic thing.
+  * Remove dependency on Cua.
+  * Buggy keys:
+    - Ctrl+[ in uxterm/urxvt
+    - Shift+Up/Down in urxvt
+  * Breaks unicode in uxterm
   * Closing.
   * Place of last edit?
   * Prolog mode.
@@ -35,6 +42,8 @@ import Yi.Config.Default.Cua (configureCua)
   * Separate new buffer command.
   * Highlight/kill-on-save trailing whitespace.
   * Save set of opened files, reopen them.
+  * Smarter Tab handling - cycle through previous indents and last + Nspaces.
+  * Mouse scroll
 -}
 
 main :: IO ()
@@ -54,7 +63,34 @@ myConfig = do
     configureMiscModes
     globalBindKeys $ ctrlCh 'k' ?>>! killRestOfLine
     globalBindKeys $ ctrlCh 'e' ?>>! switchBuffer
+    globalBindKeys $ ctrlCh 'w' ?>>! killCurrentBuffer
+    globalBindKeys $ spec KTab ?>>! autoIndentB IncreaseCycle
 
+-- | Kill current buffer asking to save if needed.
+killCurrentBuffer :: YiM ()
+killCurrentBuffer = do
+    buf <- gets currentBuffer
+    askSave <- needsSave buf
+    withEditor $ if askSave
+        then void $ spawnMinibufferE question (minibufKeymap buf)
+        else deleteBuffer buf
+  where
+    minibufKeymap buf =
+        const $ choice [ char 'n' ?>>! deleteBuffer buf >> closeBufferAndWindowE
+                       , char 'y' ?>>! saveAndClose buf
+                       , char 'c' ?>>! closeBufferAndWindowE
+                       ]
+    needsSave buf = do
+        fBuf <- withEditor $ gets $ findBufferWith buf
+        deservesSave fBuf
+    saveAndClose buf = do
+        saved <- fwriteBufferE buf
+        withEditor $ do
+            when saved $ deleteBuffer buf
+            closeBufferAndWindowE
+    question = "Buffer modified, save (Yes/No/Cancel)?"
+
+-- | Switch to other opened buffer (asks in minibuffer)
 switchBuffer :: YiM ()
 switchBuffer = promptingForBuffer "buffer name:"
     (withEditor . switchToBufferE)
