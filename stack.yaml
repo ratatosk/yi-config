@@ -5,12 +5,16 @@ packages:
     git: git@github.com:pcapriotti/optparse-applicative
     commit: 23f15d262fede5a3a0fe9c25808719b811275df0
   extra-dep: true
+# Official Github repo
 - location: 
     git: git@github.com:yi-editor/yi
     commit: 7fd6b0cd023d4a2f4a72daf7b374150afea0279d
+# For local hacking:
+#- location: ../yi
   subdirs:
   - yi-core
   - yi-frontend-vty
+  - yi-frontend-pango
   - yi-keymap-cua
   - yi-keymap-emacs
   - yi-misc-modes

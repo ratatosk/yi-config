@@ -2,8 +2,10 @@
 {-# LANGUAGE FlexibleContexts #-}
 import Control.Monad.State.Lazy
 import Data.List
+import Data.Semigroup ((<>))
 import Lens.Micro.Platform
-import System.Environment
+
+import Options.Applicative
 
 import Yi.Buffer
 import Yi.Core
@@ -20,15 +22,18 @@ import Yi.Config.Default.HaskellMode (configureHaskellMode)
 import Yi.Config.Default.MiscModes (configureMiscModes)
 import Yi.Config.Default.Vty (configureVty)
 import Yi.Config.Default.Cua (configureCua)
+import Yi.Config.Default.Pango (configurePango)
 
 {-
   TODOS:
   * Keep indent on Enter.
+  * Remote intercace (a la emacs server).
+  * Recent files.
   * Splitting horizontally, vertically.
   * Make config a record rather than monadic thing.
   * Remove dependency on Cua.
   * Buggy keys:
-    - Ctrl+[ in uxterm/urxvt
+    - Ctrl+[ in uxterm/urxvt (looks like this is due to vty legacy)
     - Shift+Up/Down in urxvt
   * Breaks unicode in uxterm
   * Closing.
@@ -46,24 +51,39 @@ import Yi.Config.Default.Cua (configureCua)
   * Mouse scroll
 -}
 
+data CmdOptions = CmdOptions
+    { usePango  :: Bool
+    , files :: [FilePath] 
+    }
+
+cmdParser :: Parser CmdOptions
+cmdParser = CmdOptions
+    <$> switch (long "pango" <> short 'p' <> help "Use Pango frontend")
+    <*> many (argument str (metavar "FILE"))
+
+cmdParserInfo :: ParserInfo CmdOptions
+cmdParserInfo = info (helper <*> cmdParser) $ fullDesc <> header "Yi Editor"
+
 main :: IO ()
 main = do
-    files <- getArgs
-    let openFileActions = intersperse (EditorA newTabE) (map (YiA . openNewFile) files)
+    cmdOpts <- execParser cmdParserInfo
+    let openFileActions = intersperse (EditorA newTabE) (map (YiA . openNewFile) (files cmdOpts))
     cfg <- execStateT
-        (runConfigM (myConfig >> (startActionsA .= openFileActions)))
+        (runConfigM (myConfig cmdOpts >> (startActionsA .= openFileActions)))
         defaultConfig
     startEditor cfg Nothing
 
-myConfig :: ConfigM ()
-myConfig = do
-    configureVty
+myConfig :: CmdOptions -> ConfigM ()
+myConfig opts = do
+    if usePango opts then configurePango else configureVty
     configureCua
     configureHaskellMode
     configureMiscModes
     globalBindKeys $ ctrlCh 'k' ?>>! killRestOfLine
     globalBindKeys $ ctrlCh 'e' ?>>! switchBuffer
     globalBindKeys $ ctrlCh 'w' ?>>! killCurrentBuffer
+    globalBindKeys $ shift (ctrlCh '8') ?>>! splitE
+--    globalBindKeys $ shift (ctrlCh '0') ?>>! splitE
     globalBindKeys $ spec KTab ?>>! autoIndentB IncreaseCycle
 
 -- | Kill current buffer asking to save if needed.
