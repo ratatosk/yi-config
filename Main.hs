@@ -82,8 +82,7 @@ myConfig opts = do
     globalBindKeys $ ctrlCh 'k' ?>>! killRestOfLine
     globalBindKeys $ ctrlCh 'e' ?>>! switchBuffer
     globalBindKeys $ ctrlCh 'w' ?>>! killCurrentBuffer
-    globalBindKeys $ shift (ctrlCh '8') ?>>! splitE
---    globalBindKeys $ shift (ctrlCh '0') ?>>! splitE
+    globalBindKeys $ metaCh 'v' ?>>! splitE
     globalBindKeys $ spec KTab ?>>! autoIndentB IncreaseCycle
 
 -- | Kill current buffer asking to save if needed.
