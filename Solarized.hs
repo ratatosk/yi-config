@@ -1,5 +1,7 @@
 module Solarized (solarizedTheme) where
 
+import Data.Bits
+
 import Yi
 import Yi.Style
 import Yi.Style.Library
@@ -8,7 +10,7 @@ import Yi.Style.Library
 solarizedTheme :: Theme
 solarizedTheme = defaultTheme `override` \sets _ -> sets {
     baseAttributes = emptyAttributes{
-        background = solarizedBase03,
+        background = rgb 0x222222,
         foreground = solarizedRed
         },
     selectedStyle = withBg grey,
@@ -26,6 +28,12 @@ solarizedTheme = defaultTheme `override` \sets _ -> sets {
     quoteStyle = withFg solarizedOrange,
     builtinStyle = withFg solarizedRed
 }
+
+rgb :: Int -> Color
+rgb val = RGB
+    (fromIntegral ((val .&. 0xFF0000) `shiftR` 16))
+    (fromIntegral ((val .&. 0x00FF00) `shiftR`  8))
+    (fromIntegral ( val .&. 0x0000FF))
 
 solarizedBase03 :: Color
 solarizedBase03 = RGB 0 43 54
