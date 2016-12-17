@@ -15,7 +15,7 @@ import Yi.File
 import Yi.Keymap
 import Yi.Keymap.Keys
 import Yi.MiniBuffer (promptingForBuffer, spawnMinibufferE)
-import Yi.Config.Simple (globalBindKeys)
+import Yi.Config.Simple (globalBindKeys, theme)
 import Yi.Config.Simple.Types
 import Yi.Config.Default (defaultConfig)
 import Yi.Config.Default.HaskellMode (configureHaskellMode)
@@ -23,6 +23,8 @@ import Yi.Config.Default.MiscModes (configureMiscModes)
 import Yi.Config.Default.Vty (configureVty)
 import Yi.Config.Default.Cua (configureCua)
 import Yi.Config.Default.Pango (configurePango)
+
+import Solarized
 
 {-
   TODOS:
@@ -48,7 +50,7 @@ import Yi.Config.Default.Pango (configurePango)
   * Highlight/kill-on-save trailing whitespace.
   * Save set of opened files, reopen them.
   * Smarter Tab handling - cycle through previous indents and last + Nspaces.
-  * Mouse scroll
+  * Mouse scroll in Vty.
 -}
 
 data CmdOptions = CmdOptions
@@ -84,6 +86,7 @@ myConfig opts = do
     globalBindKeys $ ctrlCh 'w' ?>>! killCurrentBuffer
     globalBindKeys $ metaCh 'v' ?>>! splitE
     globalBindKeys $ spec KTab ?>>! autoIndentB IncreaseCycle
+    theme .= solarizedTheme
 
 -- | Kill current buffer asking to save if needed.
 killCurrentBuffer :: YiM ()

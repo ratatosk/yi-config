@@ -18,6 +18,7 @@ dependencies:
     - yi-mode-haskell
     - yi-rope
     - yi-keymap-cua
+    - yi-language
 
 executables:
     yi:
