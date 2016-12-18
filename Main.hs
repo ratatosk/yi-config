@@ -28,17 +28,14 @@ import ColorTheme
 
 {-
   TODOS:
-  * Keep indent on Enter.
   * Remote intercace (a la emacs server).
   * Recent files.
-  * Splitting horizontally, vertically.
   * Make config a record rather than monadic thing.
   * Remove dependency on Cua.
   * Buggy keys:
     - Ctrl+[ in uxterm/urxvt (looks like this is due to vty legacy)
     - Shift+Up/Down in urxvt
   * Breaks unicode in uxterm
-  * Closing.
   * Place of last edit?
   * Prolog mode.
   * Smarter buffer selector (Ctrl-E):
@@ -46,7 +43,6 @@ import ColorTheme
     - fuzzy (common subsequence).
     - don't create new buffer, pick top one on Enter.
     - handle arrows.
-  * Separate new buffer command.
   * Highlight/kill-on-save trailing whitespace.
   * Save set of opened files, reopen them.
   * Smarter Tab handling - cycle through previous indents and last + Nspaces.
@@ -85,7 +81,10 @@ myConfig opts = do
     globalBindKeys $ ctrlCh 'e' ?>>! switchBuffer
     globalBindKeys $ ctrlCh 'w' ?>>! killCurrentBuffer
     globalBindKeys $ metaCh 'v' ?>>! splitE
+    globalBindKeys $ meta (spec KLeft) ?>>! nextWinE
+    globalBindKeys $ meta (spec KRight) ?>>! prevWinE
     globalBindKeys $ spec KTab ?>>! autoIndentB IncreaseCycle
+    globalBindKeys $ spec KEnter ?>>! newlineAndIndentB
     theme .= myTheme (usePango opts)
 
 -- | Kill current buffer asking to save if needed.
