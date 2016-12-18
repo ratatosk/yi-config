@@ -24,7 +24,7 @@ import Yi.Config.Default.Vty (configureVty)
 import Yi.Config.Default.Cua (configureCua)
 import Yi.Config.Default.Pango (configurePango)
 
-import Solarized
+import ColorTheme
 
 {-
   TODOS:
@@ -86,7 +86,7 @@ myConfig opts = do
     globalBindKeys $ ctrlCh 'w' ?>>! killCurrentBuffer
     globalBindKeys $ metaCh 'v' ?>>! splitE
     globalBindKeys $ spec KTab ?>>! autoIndentB IncreaseCycle
-    theme .= solarizedTheme
+    theme .= myTheme (usePango opts)
 
 -- | Kill current buffer asking to save if needed.
 killCurrentBuffer :: YiM ()
