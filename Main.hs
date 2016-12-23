@@ -8,6 +8,7 @@ import Lens.Micro.Platform
 import Options.Applicative
 
 import Yi.Buffer
+import Yi.Buffer.HighLevel (deleteTrailingSpaceB)
 import Yi.Core
 import Yi.Config
 import Yi.Editor
@@ -15,7 +16,8 @@ import Yi.File
 import Yi.Keymap
 import Yi.Keymap.Keys
 import Yi.MiniBuffer (promptingForBuffer, spawnMinibufferE)
-import Yi.Config.Simple (globalBindKeys, theme)
+import Yi.Modes
+import Yi.Config.Simple (globalBindKeys, theme, addMode)
 import Yi.Config.Simple.Types
 import Yi.Config.Default (defaultConfig)
 import Yi.Config.Default.HaskellMode (configureHaskellMode)
@@ -43,7 +45,7 @@ import ColorTheme
     - fuzzy (common subsequence).
     - don't create new buffer, pick top one on Enter.
     - handle arrows.
-  * Highlight/kill-on-save trailing whitespace.
+  * Highlight trailing whitespace, ask before killing on save.
   * Save set of opened files, reopen them.
   * Smarter Tab handling - cycle through previous indents and last + Nspaces.
   * Mouse scroll in Vty.
@@ -51,7 +53,7 @@ import ColorTheme
 
 data CmdOptions = CmdOptions
     { usePango  :: Bool
-    , files :: [FilePath] 
+    , files :: [FilePath]
     }
 
 cmdParser :: Parser CmdOptions
@@ -77,15 +79,20 @@ myConfig opts = do
     configureCua
     configureHaskellMode
     configureMiscModes
+    addMode javaMode
     globalBindKeys $ ctrlCh 'k' ?>>! killRestOfLine
     globalBindKeys $ ctrlCh 'e' ?>>! switchBuffer
     globalBindKeys $ ctrlCh 'w' ?>>! killCurrentBuffer
+    globalBindKeys $ ctrlCh 's' ?>>! cleanAndSave
     globalBindKeys $ metaCh 'v' ?>>! splitE
     globalBindKeys $ meta (spec KLeft) ?>>! nextWinE
     globalBindKeys $ meta (spec KRight) ?>>! prevWinE
     globalBindKeys $ spec KTab ?>>! autoIndentB IncreaseCycle
     globalBindKeys $ spec KEnter ?>>! newlineAndIndentB
     theme .= myTheme (usePango opts)
+
+cleanAndSave :: YiM ()
+cleanAndSave = void $ withCurrentBuffer deleteTrailingSpaceB >> fwriteE
 
 -- | Kill current buffer asking to save if needed.
 killCurrentBuffer :: YiM ()
@@ -122,4 +129,3 @@ killRestOfLine :: BufferM ()
 killRestOfLine =
     do eol <- atEol
        if eol then deleteN 1 else deleteToEol
-
