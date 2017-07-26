@@ -1,14 +1,9 @@
-resolver: lts-7.7
+resolver: lts-9.0
 packages:
 - location: .
-- location:
-    git: git@github.com:pcapriotti/optparse-applicative
-    commit: 23f15d262fede5a3a0fe9c25808719b811275df0
-  extra-dep: true
-# Official Github repo
 - location: 
     git: git@github.com:yi-editor/yi
-    commit: 7fd6b0cd023d4a2f4a72daf7b374150afea0279d
+    commit: 4bd5dc26109ade8a4f757f454fce063385cb6855
 # For local hacking:
 #- location: ../yi
   subdirs:
