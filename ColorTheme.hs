@@ -7,9 +7,10 @@ import Yi
 
 -- Color theme roughly based on emacs tango dark.
 myTheme :: Bool -> Theme
-myTheme usePango = defaultTheme `override` \sets _ -> sets 
+myTheme False = defaultTheme
+myTheme True = defaultTheme `override` \sets _ -> sets
     { baseAttributes = emptyAttributes
-        { background = rgb $ if usePango then 0x222222 else 0x000000
+        { background = rgb 0x222222
         , foreground = rgb 0xE0E2E4
         }
     , selectedStyle = withBg (rgb 0x204a87)

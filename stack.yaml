@@ -1,12 +1,17 @@
-resolver: lts-9.0
+resolver: lts-9.17
 packages:
 - location: .
-- location: 
+- location:
+    git: git@github.com:yi-editor/yi-rope
+    commit: fc711de176aa1453cd197826c2f84a5b21c9ca51
+  extra-dep: true
+- location:
     git: git@github.com:yi-editor/yi
-    commit: 4bd5dc26109ade8a4f757f454fce063385cb6855
+    commit: c344ffd26988a47aaaf1029f38968460cba4b695
 # For local hacking:
 #- location: ../yi
   subdirs:
+  - yi-language
   - yi-core
   - yi-frontend-vty
   - yi-frontend-pango
